@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Мессенджер</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDE6D3;
+    --paper2:#E3DAC2;
+    --ink:#1C1A16;
+    --wire:#1B3A8C;
+    --stamp:#B23A2E;
+    --muted:#8A8272;
+    --line:#1C1A16;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;font-family:'JetBrains Mono',monospace;
+    background:var(--paper);
+    background-image:
+      repeating-linear-gradient(0deg, rgba(0,0,0,.025) 0px, rgba(0,0,0,.025) 1px, transparent 1px, transparent 3px);
+    color:var(--ink);height:100vh;overflow:hidden;
+  }
+  h1,.brand,.tab,#chatHeader .who{font-family:'Special Elite',monospace;}
+  #app{display:flex;height:100vh;}
+
+  /* ---------- Auth screen ---------- */
+  #authScreen{
+    width:100%;display:flex;align-items:center;justify-content:center;
+    background:
+      radial-gradient(circle at 20% 20%, rgba(27,58,140,.06), transparent 40%),
+      var(--paper);
+  }
+  .authBox{
+    background:var(--paper2);padding:32px;width:340px;max-width:90vw;
+    border:2px solid var(--ink);box-shadow:7px 7px 0 var(--ink);
+    position:relative;
+  }
+  .authBox::before{
+    content:"№ 001 · PRIVATE WIRE";
+    position:absolute;top:-11px;left:20px;background:var(--paper);
+    padding:0 8px;font-size:10px;letter-spacing:2px;color:var(--muted);
+  }
+  .authBox h1{margin:0 0 4px;font-size:24px;letter-spacing:1px;}
+  .authBox p{color:var(--muted);font-size:12px;margin:0 0 20px;text-transform:uppercase;letter-spacing:1px;}
+  .authBox input{
+    width:100%;padding:12px;margin-bottom:10px;border:2px solid var(--ink);
+    background:var(--paper);color:var(--ink);font-size:14px;font-family:'JetBrains Mono',monospace;
+  }
+  .authBox input:focus{outline:3px solid var(--wire);outline-offset:1px;}
+  .authBox button{
+    width:100%;padding:12px;border:2px solid var(--ink);background:var(--wire);
+    color:var(--paper);font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+    cursor:pointer;margin-top:6px;box-shadow:4px 4px 0 var(--ink);transition:transform .05s;
+  }
+  .authBox button:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--ink);}
+  .authBox .switch{color:var(--muted);font-size:12px;text-align:center;margin-top:16px;cursor:pointer;}
+  .authBox .switch b{color:var(--stamp);}
+  .err{color:var(--stamp);font-size:12px;margin-top:6px;min-height:16px;font-weight:700;}
+
+  /* ---------- Main layout ---------- */
+  #mainScreen{display:none;width:100%;height:100%;}
+  #sidebar{
+    width:300px;min-width:300px;background:var(--paper2);border-right:2px solid var(--ink);
+    display:flex;flex-direction:column;
+  }
+  #me{padding:14px 16px;border-bottom:2px solid var(--ink);display:flex;align-items:center;justify-content:space-between;background:var(--ink);}
+  #me .name{font-weight:700;font-family:'Special Elite',monospace;color:var(--paper);letter-spacing:1px;}
+  #me button{background:none;border:1px solid var(--paper2);color:var(--paper2);cursor:pointer;font-size:11px;padding:5px 9px;text-transform:uppercase;letter-spacing:1px;}
+
+  .tabs{display:flex;border-bottom:2px solid var(--ink);}
+  .tab{flex:1;text-align:center;padding:10px;font-size:12px;color:var(--muted);cursor:pointer;text-transform:uppercase;letter-spacing:1px;}
+  .tab.active{color:var(--ink);background:var(--paper);border-bottom:3px solid var(--stamp);margin-bottom:-2px;}
+
+  #addFriendBox{padding:10px 14px;border-bottom:2px dashed var(--ink);display:flex;gap:6px;}
+  #addFriendBox input{
+    flex:1;padding:9px 10px;border:2px solid var(--ink);background:var(--paper);
+    color:var(--ink);font-size:13px;font-family:'JetBrains Mono',monospace;
+  }
+  #addFriendBox button{padding:9px 12px;border:2px solid var(--ink);background:var(--stamp);color:var(--paper);cursor:pointer;font-size:12px;font-weight:700;text-transform:uppercase;}
+
+  #list{flex:1;overflow-y:auto;}
+  .row{
+    padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;
+    border-bottom:1px dashed #1c1a1655;
+  }
+  .row:hover{background:var(--paper);}
+  .row.active{background:var(--paper);box-shadow:inset 4px 0 0 var(--wire);}
+  .avatar{
+    width:38px;height:38px;background:var(--wire);color:var(--paper);border:2px solid var(--ink);
+    display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;
+    font-family:'Special Elite',monospace;
+  }
+  .rowInfo{flex:1;min-width:0;}
+  .rowInfo .n{font-size:14px;font-weight:700;}
+  .rowInfo .s{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-transform:uppercase;letter-spacing:.5px;}
+  .reqBtns{display:flex;gap:6px;}
+  .reqBtns button{border:2px solid var(--ink);padding:6px 9px;font-size:12px;cursor:pointer;font-weight:700;}
+  .accept{background:var(--wire);color:var(--paper);}
+  .decline{background:var(--paper);color:var(--ink);}
+  .empty{padding:20px;color:var(--muted);font-size:12px;text-align:center;text-transform:uppercase;letter-spacing:1px;}
+
+  /* ---------- Chat ---------- */
+  #chatArea{flex:1;display:flex;flex-direction:column;background:var(--paper);}
+  #chatHeader{
+    padding:14px 20px;border-bottom:2px solid var(--ink);font-weight:700;display:flex;align-items:center;gap:10px;
+    background:var(--paper2);letter-spacing:.5px;
+  }
+  #noChatSelected{
+    flex:1;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;
+    text-transform:uppercase;letter-spacing:2px;
+  }
+  #messages{flex:1;overflow-y:auto;padding:24px;display:flex;flex-direction:column;gap:10px;}
+  .msg{
+    max-width:65%;padding:10px 14px;font-size:14px;line-height:1.5;word-wrap:break-word;
+    border:2px solid var(--ink);position:relative;
+  }
+  .msg.me{align-self:flex-end;background:var(--wire);color:var(--paper);box-shadow:3px 3px 0 var(--ink);}
+  .msg.other{align-self:flex-start;background:var(--paper2);color:var(--ink);box-shadow:-3px 3px 0 var(--ink);}
+  .msg .t{font-size:10px;opacity:.7;margin-top:5px;display:block;text-transform:uppercase;letter-spacing:1px;}
+  #inputBar{padding:14px;border-top:2px solid var(--ink);display:flex;gap:8px;background:var(--paper2);}
+  #inputBar input{
+    flex:1;padding:12px 14px;border:2px solid var(--ink);background:var(--paper);
+    color:var(--ink);font-size:14px;font-family:'JetBrains Mono',monospace;
+  }
+  #inputBar button{
+    padding:0 22px;border:2px solid var(--ink);background:var(--stamp);color:var(--paper);font-weight:700;cursor:pointer;
+    box-shadow:3px 3px 0 var(--ink);
+  }
+  #inputBar button:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--ink);}
+
+  @media (max-width:700px){
+    #sidebar{width:100%;min-width:0;}
+    #chatArea{display:none;}
+    body.chatOpen #sidebar{display:none;}
+    body.chatOpen #chatArea{display:flex;}
+    #backBtn{display:inline-block !important;}
+  }
+  #backBtn{display:none;background:none;border:none;color:var(--ink);font-size:18px;cursor:pointer;padding:0 8px 0 0;}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- AUTH -->
+  <div id="authScreen">
+    <div class="authBox">
+      <h1 id="authTitle">Вход</h1>
+      <p id="authSubtitle">Войдите, чтобы продолжить</p>
+      <input id="usernameInput" placeholder="Юзернейм (только для регистрации)" style="display:none;">
+      <input id="emailInput" placeholder="Email" type="email">
+      <input id="passInput" placeholder="Пароль" type="password">
+      <button id="authSubmitBtn">Войти</button>
+      <div class="err" id="authErr"></div>
+      <div class="switch" id="authSwitch">Нет аккаунта? <b>Зарегистрироваться</b></div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="mainScreen">
+    <div id="sidebar">
+      <div id="me">
+        <div class="name" id="myName">...</div>
+        <button id="logoutBtn">Выйти</button>
+      </div>
+      <div id="addFriendBox">
+        <input id="friendInput" placeholder="Юзернейм друга">
+        <button id="addFriendBtn">Добавить</button>
+      </div>
+      <div class="tabs">
+        <div class="tab active" data-tab="chats">Чаты</div>
+        <div class="tab" data-tab="requests">Заявки <span id="reqBadge"></span></div>
+      </div>
+      <div id="list"></div>
+    </div>
+
+    <div id="chatArea">
+      <div id="noChatSelected">Выберите чат слева</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Firebase SDK (compat, проще всего для одного HTML-файла) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+/* =======================================================
+   1. ВСТАВЬ СЮДА СВОЙ FIREBASE CONFIG
+   (Firebase Console -> Project settings -> General -> Your apps -> SDK setup and configuration)
+   ======================================================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyAQJ1aWmizhddQINv9ilTEb-mKLXR6Yn1c",
+  authDomain: "slygram-a10d1.firebaseapp.com",
+  projectId: "slygram-a10d1",
+  storageBucket: "slygram-a10d1.firebasestorage.app",
+  messagingSenderId: "352496417787",
+  appId: "1:352496417787:web:3902f252ab1fb1fe29295e"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+let isLogin = true;
+let isRegistering = false;
+let currentUser = null;      // firebase auth user
+let myUsername = null;
+let myFriends = [];
+let incomingRequests = [];
+let activeChatWith = null;   // username собеседника
+let unsubMessages = null;
+let unsubFriends = null;
+let unsubRequests = null;
+let activeTab = 'chats';
+
+/* ---------------- AUTH UI ---------------- */
+const authTitle = document.getElementById('authTitle');
+const authSubtitle = document.getElementById('authSubtitle');
+const usernameInput = document.getElementById('usernameInput');
+const emailInput = document.getElementById('emailInput');
+const passInput = document.getElementById('passInput');
+const authErr = document.getElementById('authErr');
+const authSwitch = document.getElementById('authSwitch');
+const authSubmitBtn = document.getElementById('authSubmitBtn');
+
+authSwitch.onclick = () => {
+  isLogin = !isLogin;
+  authTitle.textContent = isLogin ? 'Вход' : 'Регистрация';
+  authSubtitle.textContent = isLogin ? 'Войдите, чтобы продолжить' : 'Придумайте юзернейм и данные для входа';
+  usernameInput.style.display = isLogin ? 'none' : 'block';
+  authSubmitBtn.textContent = isLogin ? 'Войти' : 'Зарегистрироваться';
+  authSwitch.innerHTML = isLogin ? 'Нет аккаунта? <b>Зарегистрироваться</b>' : 'Уже есть аккаунт? <b>Войти</b>';
+  authErr.textContent = '';
+};
+
+authSubmitBtn.onclick = async () => {
+  authErr.textContent = '';
+  const email = emailInput.value.trim();
+  const pass = passInput.value;
+  if (!email || !pass) { authErr.textContent = 'Заполните email и пароль'; return; }
+
+  const originalText = authSubmitBtn.textContent;
+  authSubmitBtn.disabled = true;
+  authSubmitBtn.textContent = isLogin ? 'Входим...' : 'Регистрируем...';
+
+  try {
+    if (isLogin) {
+      await auth.signInWithEmailAndPassword(email, pass);
+    } else {
+      const username = usernameInput.value.trim().toLowerCase();
+      if (!/^[a-z0-9_]{3,20}$/.test(username)) {
+        authErr.textContent = 'Юзернейм: 3-20 символов, латиница/цифры/_';
+        return;
+      }
+      // проверяем, что юзернейм свободен
+      const taken = await db.collection('usernames').doc(username).get();
+      if (taken.exists) { authErr.textContent = 'Этот юзернейм уже занят'; return; }
+
+      isRegistering = true;
+      const cred = await auth.createUserWithEmailAndPassword(email, pass);
+      const uid = cred.user.uid;
+
+      await db.collection('usernames').doc(username).set({ uid });
+      await db.collection('users').doc(uid).set({
+        username, email, friends: [], createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      isRegistering = false;
+      await enterApp(cred.user, username);
+    }
+  } catch (e) {
+    authErr.textContent = (translateError(e.code) || e.message || 'Неизвестная ошибка') + (e.code ? ` (${e.code})` : '');
+  } finally {
+    isRegistering = false;
+    authSubmitBtn.disabled = false;
+    authSubmitBtn.textContent = originalText;
+  }
+};
+
+function translateError(code){
+  const map = {
+    'auth/email-already-in-use': 'Этот email уже используется',
+    'auth/invalid-email': 'Некорректный email',
+    'auth/weak-password': 'Пароль слишком простой (мин. 6 символов)',
+    'auth/user-not-found': 'Пользователь не найден',
+    'auth/wrong-password': 'Неверный пароль',
+    'auth/invalid-credential': 'Неверный email или пароль'
+  };
+  return map[code];
+}
+
+document.getElementById('logoutBtn').onclick = () => auth.signOut();
+
+/* ---------------- AUTH STATE ---------------- */
+async function enterApp(user, username){
+  currentUser = user;
+  myUsername = username;
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('mainScreen').style.display = 'flex';
+  document.getElementById('myName').textContent = '@' + myUsername;
+  listenFriends();
+  listenRequests();
+}
+
+auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    if (isRegistering) return; // анкета ещё дозаписывается, дождёмся ручного enterApp()
+    currentUser = user;
+    const doc = await db.collection('users').doc(user.uid).get();
+    if (!doc.exists) {
+      authErr.textContent = 'Профиль не найден в базе (users/' + user.uid + '). Попробуй зарегистрироваться заново.';
+      auth.signOut();
+      return;
+    }
+    await enterApp(user, doc.data().username);
+  } else {
+    currentUser = null;
+    myUsername = null;
+    if (unsubFriends) unsubFriends();
+    if (unsubRequests) unsubRequests();
+    if (unsubMessages) unsubMessages();
+    document.getElementById('authScreen').style.display = 'flex';
+    document.getElementById('mainScreen').style.display = 'none';
+  }
+});
+
+/* ---------------- ДОБАВЛЕНИЕ ДРУГА ПО ЮЗЕРНЕЙМУ ---------------- */
+document.getElementById('addFriendBtn').onclick = async () => {
+  const input = document.getElementById('friendInput');
+  const target = input.value.trim().toLowerCase();
+  if (!target) return;
+  if (target === myUsername) { alert('Это твой собственный юзернейм'); return; }
+
+  const targetDoc = await db.collection('usernames').doc(target).get();
+  if (!targetDoc.exists) { alert('Пользователь с таким юзернеймом не найден'); return; }
+
+  const targetUid = targetDoc.data().uid;
+  // создаём заявку в друзья: id = "meUid_targetUid"
+  const reqId = `${currentUser.uid}_${targetUid}`;
+  await db.collection('friendRequests').doc(reqId).set({
+    from: currentUser.uid,
+    fromUsername: myUsername,
+    to: targetUid,
+    toUsername: target,
+    status: 'pending',
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  input.value = '';
+  alert('Заявка отправлена');
+};
+
+/* ---------------- ЗАЯВКИ В ДРУЗЬЯ (входящие) ---------------- */
+function listenRequests(){
+  unsubRequests = db.collection('friendRequests')
+    .where('to', '==', currentUser.uid)
+    .where('status', '==', 'pending')
+    .onSnapshot(snap => {
+      incomingRequests = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      document.getElementById('reqBadge').textContent = incomingRequests.length ? `(${incomingRequests.length})` : '';
+      if (activeTab === 'requests') renderList();
+    });
+}
+
+async function acceptRequest(req){
+  const batch = db.batch();
+  batch.update(db.collection('friendRequests').doc(req.id), { status: 'accepted' });
+  batch.update(db.collection('users').doc(currentUser.uid), {
+    friends: firebase.firestore.FieldValue.arrayUnion(req.from)
+  });
+  batch.update(db.collection('users').doc(req.from), {
+    friends: firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+  });
+  await batch.commit();
+}
+
+async function declineRequest(req){
+  await db.collection('friendRequests').doc(req.id).update({ status: 'declined' });
+}
+
+/* ---------------- СПИСОК ДРУЗЕЙ ---------------- */
+function listenFriends(){
+  unsubFriends = db.collection('users').doc(currentUser.uid)
+    .onSnapshot(async doc => {
+      const uids = doc.data().friends || [];
+      if (uids.length === 0) { myFriends = []; if (activeTab==='chats') renderList(); return; }
+      const docs = await Promise.all(uids.map(uid => db.collection('users').doc(uid).get()));
+      myFriends = docs.filter(d=>d.exists).map(d => ({ uid: d.id, username: d.data().username }));
+      if (activeTab === 'chats') renderList();
+    });
+}
+
+/* ---------------- ТАБЫ ---------------- */
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.onclick = () => {
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    activeTab = tab.dataset.tab;
+    renderList();
+  };
+});
+
+function renderList(){
+  const list = document.getElementById('list');
+  list.innerHTML = '';
+  if (activeTab === 'chats') {
+    if (myFriends.length === 0) {
+      list.innerHTML = '<div class="empty">Пока нет друзей — добавь по юзернейму выше</div>';
+      return;
+    }
+    myFriends.forEach(f => {
+      const row = document.createElement('div');
+      row.className = 'row' + (activeChatWith === f.username ? ' active' : '');
+      row.innerHTML = `
+        <div class="avatar">${f.username[0].toUpperCase()}</div>
+        <div class="rowInfo"><div class="n">@${f.username}</div><div class="s">Нажми, чтобы открыть чат</div></div>
+      `;
+      row.onclick = () => openChat(f.username, f.uid);
+      list.appendChild(row);
+    });
+  } else {
+    if (incomingRequests.length === 0) {
+      list.innerHTML = '<div class="empty">Нет входящих заявок</div>';
+      return;
+    }
+    incomingRequests.forEach(r => {
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML = `
+        <div class="avatar">${r.fromUsername[0].toUpperCase()}</div>
+        <div class="rowInfo"><div class="n">@${r.fromUsername}</div><div class="s">хочет добавить тебя в друзья</div></div>
+        <div class="reqBtns">
+          <button class="accept">✓</button>
+          <button class="decline">✕</button>
+        </div>
+      `;
+      row.querySelector('.accept').onclick = (e) => { e.stopPropagation(); acceptRequest(r); };
+      row.querySelector('.decline').onclick = (e) => { e.stopPropagation(); declineRequest(r); };
+      list.appendChild(row);
+    });
+  }
+}
+
+/* ---------------- ЧАТ ---------------- */
+function chatIdFor(uidA, uidB){
+  return [uidA, uidB].sort().join('_');
+}
+
+function openChat(username, uid){
+  activeChatWith = username;
+  document.body.classList.add('chatOpen');
+  renderList();
+
+  const chatArea = document.getElementById('chatArea');
+  chatArea.innerHTML = `
+    <div id="chatHeader">
+      <button id="backBtn">←</button>
+      <div class="avatar" style="width:32px;height:32px;font-size:13px;">${username[0].toUpperCase()}</div>
+      @${username}
+    </div>
+    <div id="messages"></div>
+    <div id="inputBar">
+      <input id="msgInput" placeholder="Написать сообщение...">
+      <button id="sendBtn">➤</button>
+    </div>
+  `;
+  document.getElementById('backBtn').onclick = () => {
+    document.body.classList.remove('chatOpen');
+  };
+
+  const cid = chatIdFor(currentUser.uid, uid);
+  if (unsubMessages) unsubMessages();
+  unsubMessages = db.collection('chats').doc(cid).collection('messages')
+    .orderBy('createdAt', 'asc')
+    .onSnapshot(snap => {
+      const box = document.getElementById('messages');
+      if (!box) return;
+      box.innerHTML = '';
+      snap.forEach(doc => {
+        const m = doc.data();
+        const mine = m.from === currentUser.uid;
+        const div = document.createElement('div');
+        div.className = 'msg ' + (mine ? 'me' : 'other');
+        const time = m.createdAt ? m.createdAt.toDate().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : '';
+        div.innerHTML = `${escapeHtml(m.text)}<span class="t">${time}</span>`;
+        box.appendChild(div);
+      });
+      box.scrollTop = box.scrollHeight;
+    });
+
+  const send = async () => {
+    const input = document.getElementById('msgInput');
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    await db.collection('chats').doc(cid).collection('messages').add({
+      text, from: currentUser.uid, to: uid,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    await db.collection('chats').doc(cid).set({ members: [currentUser.uid, uid] }, { merge: true });
+  };
+  document.getElementById('sendBtn').onclick = send;
+  document.getElementById('msgInput').addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+}
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+</script>
+</body>
+</html>

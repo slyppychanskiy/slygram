@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Мессенджер Deluxe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/css_style.css">
+</head>
+<body>
+
+<div id="app">
+  <!-- AUTH -->
+  <div id="authScreen">
+    <div class="authBox">
+      <h1 id="authTitle">Вход</h1>
+      <p id="authSubtitle">Войдите, чтобы продолжить</p>
+      <input id="usernameInput" placeholder="Юзернейм (для регистрации)" style="display:none;">
+      <input id="emailInput" placeholder="Email" type="email">
+      <input id="passInput" placeholder="Пароль" type="password">
+      <button id="authSubmitBtn">Войти</button>
+      <div class="err" id="authErr"></div>
+      <div class="switch" id="authSwitch">Нет аккаунта? <b>Зарегистрироваться</b></div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="mainScreen">
+    <div id="sidebar">
+      <div id="me">
+        <div class="avatar" id="myAvatar">?</div>
+        <div class="name" id="myName">...</div>
+        <button id="logoutBtn">Выйти</button>
+      </div>
+      <div id="addFriendBox">
+        <input id="friendInput" placeholder="Юзернейм друга">
+        <button id="addFriendBtn">Добавить</button>
+      </div>
+      <div id="createGroupBar" style="display:none;">
+        <button id="openGroupModalBtn" style="width:100%;">+ Создать группу/канал</button>
+      </div>
+      <div id="searchBox">
+        <input id="searchInput" placeholder="🔍 Поиск...">
+      </div>
+      <div class="tabs">
+        <div class="tab active" data-tab="chats">Чаты</div>
+        <div class="tab" data-tab="groups">Группы</div>
+        <div class="tab" data-tab="requests">Заявки <span id="reqBadge"></span></div>
+      </div>
+      <div id="list"></div>
+    </div>
+    <div id="chatArea">
+      <div id="noChatSelected">Выберите чат или канал слева</div>
+    </div>
+  </div>
+</div>
+
+<div id="lightbox">
+  <span id="lightboxClose">&times;</span>
+  <img id="lightboxImg" src="" alt="Увеличенное изображение">
+</div>
+
+<div class="modalOverlay" id="groupModal">
+  <div class="modalBox">
+    <h2>Создание группы/канала</h2>
+    <label>Тип</label>
+    <select id="groupTypeSelect">
+      <option value="group">👥 Группа (все могут писать)</option>
+      <option value="channel">📢 Канал (пишет только админ)</option>
+    </select>
+    <label>Название</label>
+    <input id="groupNameInput" placeholder="Название...">
+    <label>Участники (Из списка друзей)</label>
+    <div class="memberCheckList" id="groupMemberList"></div>
+    <div class="modalErr" id="groupErr"></div>
+    <div class="row2">
+      <button class="close" id="groupCloseBtn">Отмена</button>
+      <button class="save" id="groupCreateSaveBtn">Создать</button>
+    </div>
+  </div>
+</div>
+
+<div class="modalOverlay" id="profileModal">
+  <div class="modalBox">
+    <h2>Настройки профиля</h2>
+    <label>Аватарка</label>
+    <div class="avatarUpload">
+      <div class="avatar" id="editAvatarPreview">?</div>
+      <button id="uploadAvatarBtn">Загрузить фото</button>
+      <button id="removeAvatarBtn">Сбросить</button>
+    </div>
+    <label>Юзернейм</label>
+    <input id="editUsername" maxlength="20">
+    <label>Описание профиля (био)</label>
+    <textarea id="editBio" maxlength="150" placeholder="Пара слов о себе..." style="width:100%; padding:8px 10px; border:2px solid var(--ink); background:var(--paper); color:var(--ink); font-size:13px; font-family:'JetBrains Mono', monospace; resize:none; height:60px;"></textarea>
+    <label>Цвет профиля (если нет фото)</label>
+    <div class="colorRow" id="colorRow"></div>
+    <label>Цвет обводки и акцента</label>
+    <div class="colorRow" id="borderColorRow"></div>
+    <label>Тема оформления</label>
+    <select id="themeSelect">
+      <option value="paper">📜 Бумага (Paper)</option>
+      <option value="dark">🌙 Ночная (Noir)</option>
+      <option value="matrix">🟢 Матрица (Terminal)</option>
+      <option value="cyber">👾 Киберпанк (Neon)</option>
+      <option value="sunset">🌅 Закат (Sunset Neon)</option>
+    </select>
+    <div class="modalErr" id="profileErr"></div>
+    <div class="row2">
+      <button class="close" id="profileCloseBtn">Отмена</button>
+      <button class="save" id="profileSaveBtn">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно просмотра чужого/своего профиля -->
+<div class="modalOverlay" id="userProfileModal">
+  <div class="modalBox" style="text-align: center;">
+    <div class="avatar" id="viewUserAvatar" style="width: 70px; height: 70px; font-size: 28px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center;">?</div>
+    <h2 id="viewUsername" style="margin-bottom: 6px;">@username</h2>
+    <div id="viewUserStatus" style="font-size: 11px; color: var(--muted); margin-bottom: 14px; text-transform: uppercase;">Офлайн</div>
+    
+    <label style="text-align: left; display: block; margin-bottom: 4px;">Описание</label>
+    <div id="viewUserBio" style="background: var(--paper); border: 2px solid var(--ink); padding: 10px; font-size: 13px; text-align: left; min-height: 44px; word-break: break-word; margin-bottom: 12px;">—</div>
+
+    <!-- Блок каналов пользователя -->
+    <label style="text-align: left; display: block; margin-bottom: 4px;">Каналы пользователя</label>
+    <div id="viewUserChannels" style="background: var(--paper); border: 2px solid var(--ink); padding: 8px; font-size: 13px; text-align: left; max-height: 100px; overflow-y: auto; margin-bottom: 16px;">
+      <span style="color: var(--muted);">Нет каналов</span>
+    </div>
+
+    <div class="row2">
+      <button class="close" id="userProfileCloseBtn" style="width: 100%;">Закрыть</button>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="imgFileInput" accept="image/*" style="display:none;">
+<input type="file" id="avatarFileInput" accept="image/*" style="display:none;">
+
+<!-- Библиотеки Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<!-- SVG-эмодзи (одинаковый вид на всех телефонах, не зависит от системного шрифта) -->
+<script src="https://cdn.jsdelivr.net/npm/twemoji@14.0.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
+
+<!-- Разделенные модули скриптов (конфигурация должна идти первой) -->
+<script src="js/firebaseConfig.js" defer></script>
+<script src="js/chatApp.js" defer></script>
+</body>
+</html>

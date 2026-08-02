@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Nory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/css_style.css">
+</head>
+<body>
+
+<div id="app">
+  <!-- AUTH -->
+  <div id="authScreen">
+    <div class="authBox">
+      <div class="brandLockup"><span class="brandDot"></span>Nory</div>
+      <h1 id="authTitle">Вход</h1>
+      <p id="authSubtitle">Войдите, чтобы продолжить</p>
+      <input id="usernameInput" placeholder="Юзернейм (для регистрации)" style="display:none;">
+      <input id="emailInput" placeholder="Email" type="email">
+      <input id="passInput" placeholder="Пароль" type="password">
+      <button id="authSubmitBtn">Войти</button>
+      <div class="err" id="authErr"></div>
+      <div class="switch" id="authSwitch">Нет аккаунта? <b>Зарегистрироваться</b></div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div id="mainScreen">
+    <div id="sidebar">
+      <div id="brandBar"><span class="brandDot"></span>Nory</div>
+      <div id="me">
+        <div class="meInfo">
+          <div class="avatar" id="myAvatar">?</div>
+          <div class="name" id="myName">...</div>
+        </div>
+        <button id="settingsBtn" class="iconBtn topIconBtn" title="Настройки"><svg class="icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg></button>
+      </div>
+      <div id="storyRow" class="storyRow">
+        <div class="storyBubble ownStory" id="storyAddBubble">
+          <div class="storyBubbleFrame"><div class="storyAddPlus">+</div></div>
+          <div class="storyLabel">Ваша история</div>
+        </div>
+        <div id="storyList" class="storyList"></div>
+      </div>
+      <div id="searchBox">
+        <div class="searchFieldWrap">
+          <svg class="icon-svg searchFieldIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="searchInput" placeholder="Поиск людей и чатов">
+        </div>
+        <button id="openGroupModalBtn" class="iconBtn topIconBtn" title="Создать группу/канал"><svg class="icon-svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
+      </div>
+      <div class="tabs">
+        <div class="tab active" data-tab="chats">Чаты</div>
+        <div class="tab" data-tab="groups">Каналы</div>
+      </div>
+      <div id="list"></div>
+    </div>
+    <div id="chatArea">
+      <div id="noChatSelected">Выберите чат или канал слева</div>
+    </div>
+  </div>
+</div>
+
+<div id="lightbox">
+  <span id="lightboxClose">&times;</span>
+  <div id="lightboxCounter"></div>
+  <img id="lightboxImg" src="" alt="Увеличенное изображение">
+  <div class="lightboxTapZones">
+    <div id="lightboxPrevZone"></div>
+    <div id="lightboxNextZone"></div>
+  </div>
+  <button id="lightboxPrev" class="lightboxNavBtn lightboxNavPrev" aria-label="Предыдущее">&#8249;</button>
+  <button id="lightboxNext" class="lightboxNavBtn lightboxNavNext" aria-label="Следующее">&#8250;</button>
+</div>
+
+<div class="modalOverlay" id="profileModal">
+  <div class="modalBox profileModalBox">
+    <div class="modalHeader">
+      <div>
+        <h2>Профиль</h2>
+        <p class="modalSubtitle">Минималистичные настройки аккаунта</p>
+      </div>
+      <button class="iconBtn closeBtn" id="profileCloseBtn" aria-label="Закрыть">×</button>
+    </div>
+
+    <div class="bannerWrap" id="editBannerWrap">
+      <div class="bannerImg" id="editBannerPreview"></div>
+      <div class="bannerActions">
+        <button id="uploadBannerBtn" class="smallBtn">Баннер</button>
+        <button id="removeBannerBtn" class="smallBtn secondaryBtn">Убрать</button>
+      </div>
+    </div>
+
+    <div class="profileTop">
+      <div class="avatar" id="editAvatarPreview">?</div>
+      <div class="profileMeta">
+        <button id="uploadAvatarBtn" class="smallBtn">Сменить фото</button>
+        <button id="removeAvatarBtn" class="smallBtn secondaryBtn">Удалить</button>
+      </div>
+    </div>
+
+    <label>Юзернейм</label>
+    <input id="editUsername" maxlength="20" placeholder="username">
+
+    <label>Описание</label>
+    <textarea id="editBio" maxlength="150" placeholder="Пара слов о себе..."></textarea>
+
+    <label>Избранный канал</label>
+    <select id="editFeaturedChannel">
+      <option value="">Нет</option>
+    </select>
+
+    <label>Значок у ника</label>
+    <div class="colorPickerRow" id="badgeRow"></div>
+
+    <div class="modalErr" id="profileErr"></div>
+    <div class="profileActions">
+      <button class="secondaryBtn close" id="profileCancelBtn">Отмена</button>
+      <button class="primaryBtn save" id="profileSaveBtn">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно настроек -->
+<div class="modalOverlay" id="settingsModal">
+  <div class="modalBox">
+    <div class="modalHeader">
+      <div>
+        <h2>Настройки</h2>
+        <p class="modalSubtitle">Персонализация и приватность</p>
+      </div>
+      <button class="iconBtn closeBtn" id="settingsCloseBtn" aria-label="Закрыть">×</button>
+    </div>
+
+    <label>Тема оформления</label>
+    <select id="themeSelect">
+      <option value="slygram">💜 Nory</option>
+      <option value="paper">📜 Бумага</option>
+      <option value="dark">🌙 Ночная</option>
+      <option value="matrix">🟢 Матрица</option>
+      <option value="cyber">👾 Киберпанк</option>
+      <option value="sunset">🌅 Закат</option>
+      <option value="ocean">🌊 Океан</option>
+      <option value="autumn">🍂 Осень</option>
+      <option value="nord">🧊 Норд</option>
+      <option value="rose">🌷 Розовый кварц</option>
+      <option value="lava">🌋 Лава</option>
+      <option value="mono">⚪ Монохром</option>
+      <option value="forest">🌲 Лес</option>
+      <option value="candy">🍬 Конфета</option>
+      <option value="coffee">☕ Кофе</option>
+      <option value="aurora">🌌 Аврора</option>
+      <option value="gold">🖤 Полночное золото</option>
+      <option value="mint">🌿 Мята</option>
+      <option value="amber">🟠 Янтарь</option>
+      <option value="galaxy">🌠 Галактика</option>
+      <option value="sakura">🌸 Сакура</option>
+      <option value="sakura2">🌸 Сакура 2.0</option>
+      <option value="frost">❄️ Айсберг</option>
+      <option value="crimson">🔴 Алая ночь</option>
+    </select>
+
+    <div class="settingsToggleRow">
+      <div>
+        <div class="settingsToggleTitle">Скрывать статус «в сети»</div>
+        <div class="settingsToggleHint">Другие не увидят, когда вы онлайн</div>
+      </div>
+      <label class="switchToggle">
+        <input type="checkbox" id="hideOnlineToggle">
+        <span class="switchTrack"></span>
+      </label>
+    </div>
+
+    <div class="settingsToggleRow">
+      <div>
+        <div class="settingsToggleTitle">Показывать превью сообщений</div>
+        <div class="settingsToggleHint">В списке чатов слева</div>
+      </div>
+      <label class="switchToggle">
+        <input type="checkbox" id="showPreviewToggle" checked>
+        <span class="switchTrack"></span>
+      </label>
+    </div>
+
+    <div class="settingsToggleRow">
+      <div>
+        <div class="settingsToggleTitle">Звук уведомлений</div>
+        <div class="settingsToggleHint">При новом сообщении</div>
+      </div>
+      <label class="switchToggle">
+        <input type="checkbox" id="soundToggle" checked>
+        <span class="switchTrack"></span>
+      </label>
+    </div>
+
+    <div class="settingsToggleRow">
+      <div>
+        <div class="settingsToggleTitle">Уведомления браузера</div>
+        <div class="settingsToggleHint">Всплывающее системное уведомление, пока вкладка открыта в фоне</div>
+      </div>
+      <label class="switchToggle">
+        <input type="checkbox" id="browserNotifToggle">
+        <span class="switchTrack"></span>
+      </label>
+    </div>
+
+    <div class="settingsToggleRow">
+      <div>
+        <div class="settingsToggleTitle">Компактный режим</div>
+        <div class="settingsToggleHint">Меньше отступов в переписке</div>
+      </div>
+      <label class="switchToggle">
+        <input type="checkbox" id="compactModeToggle">
+        <span class="switchTrack"></span>
+      </label>
+    </div>
+
+    <div class="settingsToggleRow">
+      <div>
+        <div class="settingsToggleTitle">Свечение в интерфейсе</div>
+        <div class="settingsToggleHint">Цветная подсветка вокруг сообщений и кнопок</div>
+      </div>
+      <label class="switchToggle">
+        <input type="checkbox" id="glowToggle" checked>
+        <span class="switchTrack"></span>
+      </label>
+    </div>
+
+    <div class="settingsToggleRow">
+      <div>
+        <div class="settingsToggleTitle">Размытие фона</div>
+        <div class="settingsToggleHint">Эффект blur на панелях и модалках — отключите, если приложение тормозит</div>
+      </div>
+      <label class="switchToggle">
+        <input type="checkbox" id="blurToggle" checked>
+        <span class="switchTrack"></span>
+      </label>
+    </div>
+
+    <div class="settingsToggleRow">
+      <div>
+        <div class="settingsToggleTitle">Реакция по двойному тапу</div>
+        <div class="settingsToggleHint">Какой эмодзи ставится при двойном нажатии на сообщение</div>
+      </div>
+      <button id="dblTapReactionBtn" class="dblTapReactionPicker" title="Выбрать реакцию">❤️</button>
+    </div>
+    <div id="dblTapReactionGrid" class="dblTapReactionGrid"></div>
+
+    <div class="modalErr" id="settingsErr"></div>
+    <button class="dangerBtn" id="settingsLogoutBtn">Выйти из аккаунта</button>
+  </div>
+</div>
+
+<!-- Модальное окно создания группы/канала -->
+<div class="modalOverlay" id="groupModal">
+  <div class="modalBox profileModalBox">
+    <div class="modalHeader">
+      <div>
+        <h2>Новая группа</h2>
+        <p class="modalSubtitle">Группа или канал — участники и оформление</p>
+      </div>
+      <button class="iconBtn closeBtn" id="groupModalCloseXBtn" aria-label="Закрыть">×</button>
+    </div>
+    <div class="profileTop">
+      <div class="avatar" id="groupAvatarPreview">?</div>
+      <div class="profileMeta">
+        <button type="button" id="groupUploadAvatarBtn" class="smallBtn">Фото</button>
+        <button type="button" id="groupRemoveAvatarBtn" class="smallBtn secondaryBtn">Убрать</button>
+      </div>
+    </div>
+    <label>Название</label>
+    <input id="groupNameInput" maxlength="40" placeholder="Название">
+    <label>Описание</label>
+    <textarea id="groupDescInput" maxlength="150" placeholder="Пара слов о группе или канале..."></textarea>
+    <label>Тип</label>
+    <select id="groupTypeSelect">
+      <option value="group">Группа</option>
+      <option value="channel">Канал</option>
+    </select>
+    <label>Участники</label>
+    <div id="groupMemberList" class="modalListBox"></div>
+    <div class="modalErr" id="groupErr"></div>
+    <div class="row2">
+      <button class="close" id="groupCloseBtn">Отмена</button>
+      <button class="save" id="groupCreateSaveBtn">Создать</button>
+    </div>
+  </div>
+</div>
+
+<!-- Модальное окно просмотра чужого/своего профиля -->
+<div class="modalOverlay" id="userProfileModal">
+  <div class="modalBox profileViewBox">
+    <button class="iconBtn closeBtn profileViewCloseBtn" id="userProfileCloseBtn" aria-label="Закрыть"><svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    <div class="profileViewBanner bannerImg viewBanner" id="viewUserBanner"></div>
+    <div class="profileViewHead">
+      <div class="avatar profileViewAvatar" id="viewUserAvatar">?</div>
+      <h2 id="viewUsername">@username</h2>
+      <div id="viewUserStatus" class="profileViewStatus">Офлайн</div>
+    </div>
+
+    <div class="profileViewActions">
+      <button class="profileActionBtn" id="userProfileMessageBtn">
+        <svg class="icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="m3 6.5 9 6 9-6"/></svg>
+        <span>Написать</span>
+      </button>
+    </div>
+
+    <div id="viewFeaturedChannel" class="profileFeaturedCard"></div>
+
+    <div class="profileInfoCard">
+      <label>Описание</label>
+      <div id="viewUserBio">—</div>
+    </div>
+
+    <div class="profileInfoCard" id="sharedMediaCard" style="display:none;">
+      <label>Общие медиа</label>
+      <div id="sharedMediaGrid" class="mediaGrid"></div>
+    </div>
+
+    <div class="profileInfoCard">
+      <label>Каналы пользователя</label>
+      <div id="viewUserChannels">
+        <span class="profileEmptyHint">Нет каналов</span>
+      </div>
+    </div>
+
+    <button id="userProfileRemoveFriendBtn" class="dangerBtn profileDangerBtn">
+      <svg class="icon-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px; margin-right:6px;"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6h16Z"/></svg>Удалить чат
+    </button>
+  </div>
+</div>
+
+<div class="modalOverlay" id="groupInfoModal">
+  <div class="modalBox profileModalBox" style="text-align: left;">
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+      <div class="avatar" id="giAvatar" style="width:56px; height:56px; font-size:22px; display:flex; align-items:center; justify-content:center; flex-shrink:0;"></div>
+      <div style="min-width:0; flex:1;">
+        <h2 id="giName" style="margin:0; font-size:16px; word-break:break-word;"></h2>
+        <div id="giType" style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1px;"></div>
+      </div>
+      <button id="giEditBtn" class="iconBtn topIconBtn" title="Редактировать" style="display:none; flex-shrink:0;"></button>
+    </div>
+    <div id="giDescView" style="font-size:12.5px; color:var(--muted); margin-bottom:12px; word-break:break-word; line-height:1.4;"></div>
+
+    <div id="giEditPanel" style="display:none; margin-bottom:14px;">
+      <div class="profileTop" style="margin-bottom:10px;">
+        <div class="avatar" id="giEditAvatarPreview"></div>
+        <div class="profileMeta">
+          <button type="button" id="giEditUploadAvatarBtn" class="smallBtn">Фото</button>
+          <button type="button" id="giEditRemoveAvatarBtn" class="smallBtn secondaryBtn">Убрать</button>
+        </div>
+      </div>
+      <label>Название</label>
+      <input id="giEditNameInput" maxlength="40">
+      <label>Описание</label>
+      <textarea id="giEditDescInput" maxlength="150" placeholder="Пара слов о группе или канале..."></textarea>
+      <div class="modalErr" id="giEditErr"></div>
+      <div class="row2">
+        <button class="close" id="giEditCancelBtn">Отмена</button>
+        <button class="save" id="giEditSaveBtn">Сохранить</button>
+      </div>
+    </div>
+
+    <div class="profileInfoCard" id="giMediaCard" style="display:none;">
+      <label>Медиа</label>
+      <div id="giMediaGrid" class="mediaGrid"></div>
+    </div>
+
+    <label>Участники (<span id="giMemberCount">0</span>)</label>
+    <div id="giMemberList" class="modalListBox"></div>
+    <div class="giHint">
+      <svg class="icon-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 18 1.4-8.6L9 13l3-8 3 8 4.6-3.6L21 18Z"/><path d="M4 21h16"/></svg> владелец ·
+      <svg class="icon-svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s7.5-3.6 7.5-9.5V5.3L12 2 4.5 5.3v7.2C4.5 18.4 12 22 12 22Z"/></svg> админ — может писать в канал и управлять участниками
+    </div>
+    <div id="giAddMemberWrap" style="margin-bottom:10px; display:none;">
+      <label>Добавить участника</label>
+      <div id="giAddMemberList" class="modalListBox"></div>
+    </div>
+    <div class="modalErr" id="giErr"></div>
+    <div class="row2">
+      <button class="close" id="giLeaveBtn">Покинуть</button>
+      <button class="save" id="giCloseBtn">Закрыть</button>
+    </div>
+    <button id="giDeleteBtn" class="dangerBtnSolid" style="display:none;">Удалить безвозвратно</button>
+  </div>
+</div>
+
+<div class="modalOverlay" id="forwardModal">
+  <div class="modalBox" style="max-width: 400px;">
+    <div class="modalHeader">
+      <div>
+        <h2>Переслать</h2>
+        <p class="modalSubtitle">Выберите чат назначения</p>
+      </div>
+      <button class="iconBtn closeBtn" id="forwardCloseBtn" aria-label="Закрыть">×</button>
+    </div>
+    <div id="forwardList" class="forwardList"></div>
+  </div>
+</div>
+
+<div class="modalOverlay storyViewerOverlay" id="storyViewerModal">
+  <div class="storyViewerFrame">
+    <div id="storyViewerStage">
+      <div id="storyViewerImg"></div>
+      <div class="storyProgressRow" id="storyProgressRow"></div>
+      <div class="storyViewerHeader">
+        <div class="storyViewerOwnerInfo">
+          <div class="avatar storyViewerAvatar" id="storyViewerAvatar"></div>
+          <div class="storyViewerOwnerText">
+            <div id="storyViewerOwner"></div>
+            <div id="storyViewerMeta"></div>
+          </div>
+        </div>
+        <button id="storyViewerCloseBtn" class="storyViewerCloseBtn" title="Закрыть"><svg class="icon-svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+      </div>
+      <div class="storyTapZones">
+        <div id="storyPrevZone"></div>
+        <div id="storyNextZone"></div>
+      </div>
+      <div id="storyActionRow">
+        <input id="storyReplyInput" placeholder="Ответить на историю..." autocomplete="off">
+        <button id="storyLikeBtn" class="storyIconBtn" title="Нравится"><svg class="icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg></button>
+        <button id="storySendReplyBtn" class="storyIconBtn" title="Отправить"><svg class="icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-8-8 18-2.5-7.5L3 11Z"/></svg></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="imgFileInput" accept="image/*" style="display:none;">
+<input type="file" id="stickerFileInput" accept="image/*" style="display:none;">
+<input type="file" id="avatarFileInput" accept="image/*" style="display:none;">
+<input type="file" id="bannerFileInput" accept="image/*" style="display:none;">
+<input type="file" id="storyFileInput" accept="image/*" style="display:none;">
+<input type="file" id="groupAvatarFileInput" accept="image/*" style="display:none;">
+<input type="file" id="giAvatarFileInput" accept="image/*" style="display:none;">
+
+<!-- Библиотеки Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<!-- SVG-эмодзи -->
+<script src="https://cdn.jsdelivr.net/npm/twemoji@14.0.2/dist/twemoji.min.js" crossorigin="anonymous"></script>
+
+<!-- Модули скриптов -->
+<script src="js/firebaseConfig.js" defer></script>
+<script src="js/authAndProfile.js" defer></script>
+<script src="js/chatLogic.js" defer></script>
+</body>
+</html>
